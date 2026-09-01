@@ -16,19 +16,19 @@
         resumeIndex: 0, // 第几份简历，从 0 开始递增
         serverHost: 'http://127.0.0.1:8000', // 本地服务的主机地址
         thread: 50, // 分数阈值，低于这个就不发消息了
-        timestampTimeout: 3000, // 时间戳过期时间，单位毫秒，根据当前网络设定，建议不要太大。
+        timestampTimeout: 3057, // 时间戳过期时间，单位毫秒，根据当前网络设定，建议不要太大。
         onlyGreet: false, // 是否只打招呼，默认为false，即打招呼和代聊天
-        manualFilterWaitMs: 10000, // 每轮搜索后留给用户手动筛选的时间
-        roundRestartDelayMs: 2000, // 本轮结束后，启动下一轮前的缓冲时间
+        manualFilterWaitMs: 9876, // 每轮搜索后留给用户手动筛选的时间
+        roundRestartDelayMs: 2057, // 本轮结束后，启动下一轮前的缓冲时间
         maxEmptyRounds: 3, // 连续多少轮没有拿到新岗位后停止，避免空转
-        detailTimeout: 10000, // 获取职位详情超时时间
-        greetTimeout: 12000, // 打招呼页回执超时时间
+        detailTimeout: 9987, // 获取职位详情超时时间
+        greetTimeout: 11843, // 打招呼页回执超时时间
         preloadScrollPixels: 180, // 岗位预加载：每轮下滑像素
-        preloadScrollWaitMs: 450, // 岗位预加载：每轮等待毫秒数
+        preloadScrollWaitMs: 468, // 岗位预加载：每轮等待毫秒数
         preloadStableRoundsLimit: 24, // 岗位预加载：连续多少轮无增长后结束
         preloadMaxRounds: 300, // 岗位预加载：最多滑动多少轮
         preloadActivateCardEvery: 0, // 预加载时每隔多少轮尝试轻点一次左侧岗位卡片，0 表示关闭
-        preloadActivateCardWaitMs: 250, // 轻点岗位卡片后的额外等待时间
+        preloadActivateCardWaitMs: 263, // 轻点岗位卡片后的额外等待时间
     };
 
     // 元素选择器
@@ -115,7 +115,7 @@
                 const timeoutId = setTimeout(() => {
                     observer.disconnect();
                     reject(new Error('未找到目标元素'));
-                }, 10000);
+                }, 10083);
 
                 // 定义MutationObserver回调
                 const observer = new MutationObserver((_, obs) => {
@@ -166,6 +166,11 @@
                 worker.postMessage(ms);
             });
         },
+        jitter(ms, ratio = 0.16) {
+            // 在基准值 ±ratio 范围内随机抖动，再叠加 0~1ms 扰动，避免出现整数/整十毫秒
+            const range = Math.max(35, ratio * ms);
+            return ms + (Math.random() - 0.5) * 2 * range + Math.random();
+        },
         getTimestamp(key) {
             return Number(localStorage.getItem(key));
         },
@@ -197,7 +202,7 @@
         document.body.appendChild(el);
         setTimeout(function () {
             el.remove();
-        }, 3000);
+        }, 3173);
     }
 
     /**
@@ -239,7 +244,7 @@
             this.name = name;
             this.target = target;
             this.retry = options.retry ?? 3;
-            this.retryInterval = options.retryInterval ?? 1000;
+            this.retryInterval = options.retryInterval ?? 1057;
             this.evts = {};
             this.pendingResponses = {};
             this.pendingReceives = {};
@@ -337,7 +342,7 @@
             });
         }
 
-        receive(from, type, timeout = 30000) {
+        receive(from, type, timeout = 30173) {
             const key = `${from}-${type}`;
             return new Promise((resolve, reject) => {
                 const timer = setTimeout(() => {
@@ -349,7 +354,7 @@
             });
         }
 
-        sendAndReceive(to, type, data = null, timeout = 30000) {
+        sendAndReceive(to, type, data = null, timeout = 30173) {
             const requestId = this.generateRequestId();
             const responseType = `${type}_response`;
 
@@ -486,42 +491,6 @@
             const data = `# 职位名称\n${title}\n\n# 薪资范围\n${salary}\n\n# 职位描述\n${detail}`;
             return new Promise((resolve, reject) => {
                 this.__http('/get-job-score', 'POST', JSON.stringify(data)).then(resolve).catch(reject);
-            });
-        }
-
-        /**
-         * 回复消息
-         * @param {string} msgs 消息记录
-         */
-        reply(msgs) {
-            return new Promise((resolve, reject) => {
-                this.__http('/reply', 'POST', JSON.stringify(msgs)).then(res => {
-                    resolve(res);
-                }).catch(reject);
-            });
-        }
-
-        /**
-         * 判断是否需要简历
-         * @param {string} msgs 消息记录
-         */
-        isNeedResume(msgs) {
-            return new Promise((resolve, reject) => {
-                this.__http('/is-need-resume', 'POST', JSON.stringify(msgs)).then(res => {
-                    resolve(res.need);
-                }).catch(reject);
-            });
-        }
-
-        /**
-         * 判断是否需要作品集
-         * @param {string} msgs 消息记录
-         */
-        isNeedWorks(msgs) {
-            return new Promise((resolve, reject) => {
-                this.__http('/is-need-works', 'POST', JSON.stringify(msgs)).then(res => {
-                    resolve(res.need);
-                }).catch(reject);
             });
         }
 
@@ -806,12 +775,12 @@
                     const targetCard = visibleCards[visibleCards.length - 1] || cards[cards.length - 1];
                     if (!targetCard) return;
                     targetCard.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                    await tools.asyncSleep(120);
+                    await tools.asyncSleep(tools.jitter(127));
                     targetCard.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
                     targetCard.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
                     targetCard.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
                     logger.add(`预加载第 ${round} 轮：已轻点左侧岗位卡片`);
-                    await tools.asyncSleep(OPTIONS.preloadActivateCardWaitMs);
+                    await tools.asyncSleep(tools.jitter(OPTIONS.preloadActivateCardWaitMs));
                 } catch (e) {
                     logger.add('预加载时轻点岗位卡片失败，已继续纯滚动');
                 }
@@ -837,7 +806,7 @@
                         return true;
                     }
                     logger.add('本页新增岗位都已处理过，继续向下查找');
-                    await tools.asyncSleep(OPTIONS.preloadScrollWaitMs);
+                    await tools.asyncSleep(tools.jitter(OPTIONS.preloadScrollWaitMs));
                 }
             };
 
@@ -883,7 +852,7 @@
                         emptyRounds = 0;
                         return startRound();
                     }
-                    await tools.asyncSleep(OPTIONS.roundRestartDelayMs);
+                    await tools.asyncSleep(tools.jitter(OPTIONS.roundRestartDelayMs));
                     if (this.pause) {
                         pendingRoundRestart = true;
                         logger.add('当前已暂停，下一轮等待继续');
@@ -1144,7 +1113,7 @@
                     const jobUl = await tools.endlessFind(SELECTORS.ZHIPIN.SEARCH.JOBLIST).catch(() => null);
                     const currentCount = jobUl ? jobUl.querySelectorAll(SELECTORS.ZHIPIN.SEARCH.JOBHREFS).length : 0;
                     window.scrollBy({ top: OPTIONS.preloadScrollPixels, left: 0, behavior: 'smooth' });
-                    await tools.asyncSleep(OPTIONS.preloadScrollWaitMs);
+                    await tools.asyncSleep(tools.jitter(OPTIONS.preloadScrollWaitMs));
                     await activatePreloadCard(round);
                     const afterJobUl = document.querySelector(SELECTORS.ZHIPIN.SEARCH.JOBLIST);
                     const afterCount = afterJobUl ? afterJobUl.querySelectorAll(SELECTORS.ZHIPIN.SEARCH.JOBHREFS).length : currentCount;
@@ -1184,10 +1153,10 @@
                 logger.add(`开始第 ${currentRound} 轮`);
                 logger.add(`本轮搜索关键词：${keyword}`);
                 window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-                await tools.asyncSleep(600);
+                await tools.asyncSleep(tools.jitter(637));
                 await search(keyword);
                 logger.add(`第 ${currentRound} 轮已完成搜索（关键词：${keyword}），请在 ${(OPTIONS.manualFilterWaitMs / 1000).toFixed(0)} 秒内手动选择地区、薪资等筛选条件`);
-                await tools.asyncSleep(OPTIONS.manualFilterWaitMs);
+                await tools.asyncSleep(tools.jitter(OPTIONS.manualFilterWaitMs));
                 await preloadJobs();
                 logger.add(`第 ${currentRound} 轮开始按当前筛选条件扫描岗位（关键词：${keyword}）`);
                 loop();
@@ -1332,7 +1301,7 @@
                     try {
                         const ipt = await tools.endlessFind(SELECTORS.ZHIPIN.CHAT.CHATINPUT);
                         ipt.innerText = text;
-                        await tools.asyncSleep(600);
+                        await tools.asyncSleep(tools.jitter(637));
                         const btn = await tools.endlessFind(SELECTORS.ZHIPIN.CHAT.MSGSEND);
                         btn.click();
                         resolve();
@@ -1357,7 +1326,7 @@
                         { count: ++count }
                     ).then((res) => {
                         if (res.success && heartAlive) {
-                            setTimeout(heartLoop, 1000);
+                            setTimeout(heartLoop, tools.jitter(1057));
                         }
                     }).catch(() => {
                         // 心跳超时或通道已关闭，静默停止
@@ -1477,12 +1446,12 @@
                     for (let i = 0; i < maxRetries; i++) {
                         if (ctn.scrollTop === 0) return;
                         ctn.scrollTop = 0;
-                        await tools.asyncSleep(300);
+                        await tools.asyncSleep(tools.jitter(317));
                     }
                 };
 
                 // 滚动到顶部
-                await tools.asyncSleep(300);
+                await tools.asyncSleep(tools.jitter(317));
                 await scroll2Top();
                 // 获取聊天记录
                 return await getMsgs();
@@ -1510,9 +1479,9 @@
                 const resumes = resumeCtn.querySelectorAll(SELECTORS.ZHIPIN.CHAT.RESUMELISTITEM);
                 const fallbackIndex = resumes[resumeIndex] ? resumeIndex : (resumes[OPTIONS.resumeIndex] ? OPTIONS.resumeIndex : 0);
                 const resume = resumes[fallbackIndex];
-                await tools.asyncSleep(300);
+                await tools.asyncSleep(tools.jitter(317));
                 resume.click();
-                await tools.asyncSleep(300);
+                await tools.asyncSleep(tools.jitter(317));
                 confirm.click();
                 await sendMsg('已发送，请查收');
                 return {
@@ -1571,7 +1540,7 @@
                         { count: ++count }
                     ).then((res) => {
                         if (res.success && heartAlive) {
-                            setTimeout(heartLoop, 1000);
+                            setTimeout(heartLoop, tools.jitter(1057));
                         }
                     }).catch(() => {
                         heartAlive = false;
@@ -1703,7 +1672,7 @@
                     }
                     // 向下滚动
                     ctn.scrollTop = 1014 * ++round;
-                    await tools.asyncSleep(300);
+                    await tools.asyncSleep(tools.jitter(317));
                     if (ctn.scrollTop !== lastTop) {
                         lastTop = ctn.scrollTop;
                         await once();
@@ -1729,7 +1698,7 @@
                     logger.runBtn.remove();
                     logger.clearBtn.remove();
                     // 等待加载
-                    await tools.asyncSleep(3000);
+                    await tools.asyncSleep(tools.jitter(3057));
                     chat()
                         .then(async () => {
                             status('消息处理完毕');

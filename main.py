@@ -5,9 +5,8 @@ import json
 import sys
 import threading
 from pathlib import Path
-from fastapi import FastAPI, Body, HTTPException
-from core import replyMsg, isNeedResume, isNeedWorks, evaluateSingleRouteDelivery
-from schema import Msg
+from fastapi import FastAPI, Body
+from core import evaluateSingleRouteDelivery
 from config import Config
 
 
@@ -79,10 +78,10 @@ async def get_client_config():
 @app.post("/get-job-score", summary="获取职位匹配度")
 async def get_job_score(job: str = Body(..., description="职位信息")):
     result = await asyncio.to_thread(evaluateSingleRouteDelivery, job)
-    delay_ms = max(0, Config.job_score_delay_base_ms + random.randint(
+    delay_ms = max(0.0, Config.job_score_delay_base_ms + random.uniform(
         -Config.job_score_delay_jitter_ms,
         Config.job_score_delay_jitter_ms,
-    ))
+    ) + random.random() * 0.7)
     time_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     title = result['title'] or '未识别标题'
     keyword = result['keyword'] or '无'
@@ -120,34 +119,6 @@ async def get_job_score(job: str = Body(..., description="职位信息")):
 async def log_action(action: dict = Body(..., description="动作日志")):
     append_job_action_log(action)
     return {'success': True}
-
-
-@app.post("/reply", summary="回复消息")
-async def reply(msgs: list[Msg] = Body(..., description="消息列表")):
-    try:
-        return replyMsg(msgs, '', Config.character)
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e)) from e
-
-
-@app.post("/is-need-resume", summary="是否需要简历")
-async def is_need_resume(msgs: list[Msg] = Body(..., description="消息列表")):
-    try:
-        return {
-            'need': isNeedResume(msgs)
-        }
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e)) from e
-
-
-@app.post("/is-need-works", summary="是否需要作品集")
-async def is_need_works(msgs: list[Msg] = Body(..., description="消息列表")):
-    try:
-        return {
-            'need': isNeedWorks(msgs)
-        }
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e)) from e
 
 
 if __name__ == '__main__':

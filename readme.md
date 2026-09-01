@@ -1,4 +1,4 @@
-# Boss直聘自动投递工具
+# goodJobs - Boss直聘自动投递工具
 
 浏览器油猴脚本 + 本地 Python 后端，自动在 Boss 直聘上筛选岗位、打招呼、发简历。
 
@@ -17,8 +17,6 @@
 **后端**：Python + FastAPI + Uvicorn + Pydantic
 
 **前端**：Tampermonkey 油猴脚本（原生 JS）+ BroadcastChannel 多标签页通信
-
-**AI**：Ollama 本地模型（可选，主链不依赖）
 
 ## 快速开始
 
@@ -118,22 +116,22 @@ Windows 也可以双击 `start_backend.bat`。
 |------|------|--------|
 | `thread` | 投递分数阈值 | `50` |
 | `onlyGreet` | 只打招呼不自动聊天 | `false` |
-| `manualFilterWaitMs` | 每轮搜索后等用户手动筛选的时间(ms) | `10000` |
-| `roundRestartDelayMs` | 轮次间缓冲时间(ms) | `2000` |
+| `manualFilterWaitMs` | 每轮搜索后等用户手动筛选的时间(ms) | `9876` |
+| `roundRestartDelayMs` | 轮次间缓冲时间(ms) | `2057` |
 | `maxEmptyRounds` | 连续几轮无新岗位后切换关键词 | `3` |
-| `detailTimeout` | 获取职位详情超时(ms) | `10000` |
-| `greetTimeout` | 打招呼超时(ms) | `12000` |
+| `detailTimeout` | 获取职位详情超时(ms) | `9987` |
+| `greetTimeout` | 打招呼超时(ms) | `11843` |
 | `preloadScrollPixels` | 预加载每轮下滑像素 | `180` |
-| `preloadScrollWaitMs` | 预加载每轮等待(ms) | `450` |
+| `preloadScrollWaitMs` | 预加载每轮等待(ms) | `468` |
 
 ### 后端参数（`backend`）
 
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
-| `job_score_delay_base_ms` | 打分接口基础延迟(ms) | `4000` |
-| `job_score_delay_jitter_ms` | 延迟随机抖动范围(ms) | `500` |
+| `job_score_delay_base_ms` | 打分接口基础延迟(ms) | `4187` |
+| `job_score_delay_jitter_ms` | 延迟随机抖动范围(ms) | `836` |
 
-延迟用于模拟人类行为，避免请求太快被风控。
+延迟用于模拟人类行为，避免请求太快被风控。所有时间参数均为非整十毫秒的基准值，并在运行时叠加随机抖动（`web_script.js` 的 `tools.jitter`，默认 ±16%），避免出现固定的整数/整十间隔。
 
 ### 评分规则（`scoring`）
 
@@ -155,28 +153,14 @@ Windows 也可以双击 `start_backend.bat`。
 
 ```
 ├── main.py                  # 后端入口
-├── core.py                  # 岗位评分 + 聊天逻辑
+├── core.py                  # 岗位评分 + 打招呼逻辑
 ├── config.py                # 配置加载
-├── schema.py                # 数据模型
-├── prompts.py               # LLM提示词（遗留功能）
-├── tools.py                 # 工具函数
-├── cache.py                 # 遗留兼容层
 ├── web_script.js            # 浏览器油猴脚本
 ├── user_config.example.json # 配置模板
 ├── requirements.txt         # Python依赖
 ├── start_backend.bat        # Windows启动脚本
 ├── LICENSE
 └── .gitignore
-```
-
-## 关于 Ollama
-
-主链功能（打分、打招呼、发简历）不依赖 Ollama。
-
-如果要启用遗留的自动聊天功能（`/reply`、`/is-need-resume`、`/is-need-works`），需要额外安装 [Ollama](https://ollama.com/) 并拉取模型：
-
-```bash
-ollama pull qwen3:0.6b
 ```
 
 ---
@@ -187,17 +171,19 @@ ollama pull qwen3:0.6b
 
 1. **关键词匹配是子串匹配**：配置中的短关键词（如 `ai`、`web`）可能会匹配到包含该子串的无关词（如 `said`、`webview`）。建议优先使用较长、更具体的关键词，或在 `title_block_keywords` 中拦截误命中。
 
-2. **`user_config.example.json` 与代码默认评分规则不同**：`config.py` 内置了一套默认评分规则，`user_config.example.json` 提供了另一套更精简的示例。创建 `user_config.json` 后以你的配置为准，两者不会冲突。
+2. **延迟参数是"非整十基准 + 随机抖动"**：本次改版后，所有动作间隔（打分延迟、点击、输入、滚动、轮次缓冲、心跳等）都改为非整十毫秒的基准值，再叠加 `tools.jitter` 的 ±16% 随机抖动和 0~1ms 小数扰动，实际等待时间每次都不一样，且不再出现 `1000/2000/3000` 这类整十毫秒。这是刻意用于贴近真人操作节奏，请勿为了"跑得快"改回固定小整数——固定间隔反而更容易被识别。注意前端 `setTimeout` 最终会把毫秒取整，因此浏览器里实际间隔是"非整十的整数毫秒"（如 `634`、`712`）；后端 `asyncio.sleep` 则保留小数毫秒（如 `4187.35`）。
 
-3. **评分是标题分 + JD分叠加**：一个岗位可能同时命中正向词和扣分词，最终分数是各维度叠加的结果。后端控制台和 `job_decisions.jsonl` 日志会记录详细的分数构成，排查时可参考。
+3. **超时参数是固定上限，不参与抖动**：`timestampTimeout` / `detailTimeout` / `greetTimeout` 是"等待多久后判超时"的兜底上限，代码中保持固定值（同样建议非整十，如 `3057`/`9987`/`11843`），不要把它当作动作间隔去随机化，否则可能缩短超时导致误判。
 
-4. **Boss 直聘页面结构变化**：脚本依赖 Boss 直聘的 DOM 选择器（如 `.job-card-box`、`.btn-startchat`）。如果 Boss 直聘改版，脚本可能需要同步更新选择器。
+4. **`user_config.example.json` 与代码默认规则不同**：评分关键词两侧仍是两套（`user_config.example.json` 是精简示例、`config.py` 是内置默认），创建 `user_config.json` 后以你的配置为准。时间参数两侧已统一为非整十默认值；若在 `user_config.json` 里自定义延迟，建议同样写成非整十基准（如 `4187`、`836`），否则抖动会围绕整十基准波动，削弱随机化效果。
 
-5. **多标签页不要手动刷新**：脚本通过 BroadcastChannel 在搜索页/详情页/聊天页之间通信。手动刷新某个标签页可能导致心跳断开，触发自动恢复逻辑。
+5. **评分是标题分 + JD分叠加**：一个岗位可能同时命中正向词和扣分词，最终分数是各维度叠加的结果。后端控制台和 `job_decisions.jsonl` 日志会记录详细的分数构成，排查时可参考。
 
-6. **日志文件会持续增长**：`job_decisions.jsonl` 和 `job_actions.jsonl` 是运行时追加写入的日志，不会自动清理。长期使用时注意定期清理或加入 `.gitignore`。
+6. **Boss 直聘页面结构变化**：脚本依赖 Boss 直聘的 DOM 选择器（如 `.job-card-box`、`.btn-startchat`）。如果 Boss 直聘改版，脚本可能需要同步更新选择器。
 
-7. **Ollama 为可选依赖**：主链（打分、打招呼、发简历）不需要 Ollama。只有遗留的自动聊天接口（`/reply` 等）才需要，不安装也不影响启动。
+7. **多标签页不要手动刷新**：脚本通过 BroadcastChannel 在搜索页/详情页/聊天页之间通信。手动刷新某个标签页可能导致心跳断开，触发自动恢复逻辑。
+
+8. **日志文件会持续增长**：`job_decisions.jsonl` 和 `job_actions.jsonl` 是运行时追加写入的日志，不会自动清理。长期使用时注意定期清理或加入 `.gitignore`。
 
 ## License
 

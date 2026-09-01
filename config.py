@@ -7,32 +7,30 @@ _PROJECT_DIR = Path(__file__).resolve().parent
 
 DEFAULT_USER_CONFIG = {
     'resume_name': 'resume.md',
-    'think_model': 'qwen3:0.6b',
-    'chat_model': 'qwen3:0.6b',
     'introduce': '您好，我对这个岗位很感兴趣，希望有机会进一步了解。',
     'character': '简洁 直接 礼貌',
     'tags': ['示例岗位1', '示例岗位2'],
     'backend': {
-        'job_score_delay_base_ms': 4000,
-        'job_score_delay_jitter_ms': 500,
+        'job_score_delay_base_ms': 4187,
+        'job_score_delay_jitter_ms': 836,
     },
     'frontend': {
         'serverHost': 'http://127.0.0.1:8000',
         'resumeIndex': 0,
         'thread': 50,
-        'timestampTimeout': 3000,
+        'timestampTimeout': 3057,
         'onlyGreet': False,
-        'manualFilterWaitMs': 10000,
-        'roundRestartDelayMs': 2000,
+        'manualFilterWaitMs': 9876,
+        'roundRestartDelayMs': 2057,
         'maxEmptyRounds': 3,
-        'detailTimeout': 10000,
-        'greetTimeout': 12000,
+        'detailTimeout': 9987,
+        'greetTimeout': 11843,
         'preloadScrollPixels': 180,
-        'preloadScrollWaitMs': 450,
+        'preloadScrollWaitMs': 468,
         'preloadStableRoundsLimit': 24,
         'preloadMaxRounds': 300,
         'preloadActivateCardEvery': 0,
-        'preloadActivateCardWaitMs': 250,
+        'preloadActivateCardWaitMs': 263,
     },
     'scoring': {
         'title_block_keywords': {
@@ -279,8 +277,6 @@ USER_CONFIG = load_user_config()
 
 class Config:
     resume_name = USER_CONFIG['resume_name']
-    think_model = USER_CONFIG['think_model']
-    chat_model = USER_CONFIG['chat_model']
     introduce = USER_CONFIG['introduce']
     character = USER_CONFIG['character']
     tags = USER_CONFIG['tags']
